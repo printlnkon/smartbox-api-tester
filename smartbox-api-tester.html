@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smartbox — API Tester</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0f12;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --surface3: #242840;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --accent: #4f8aff;
+    --accent-dim: rgba(79,138,255,0.12);
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,0.12);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251,191,36,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.12);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.12);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border2);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: .04em;
+  }
+  .logo span { color: var(--muted); }
+  header .spacer { flex: 1; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted);
+    transition: background .3s;
+  }
+  .status-dot.ok { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.err { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .status-label { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+  /* ── Layout ── */
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── Sidebar ── */
+  aside {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .cfg-panel {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cfg-panel h3 {
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .field { margin-bottom: 10px; }
+  .field label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field input.has-value { border-color: rgba(79,138,255,.4); }
+
+  .token-row { display: flex; gap: 6px; }
+  .token-row input { flex: 1; min-width: 0; }
+  .btn-sm {
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 0 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  .btn-sm:hover { background: var(--surface3); border-color: var(--accent); color: var(--accent); }
+  .md5-hint { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+
+  /* ── Nav groups ── */
+  nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+  .nav-group-label {
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 16px 4px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: background .12s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface2); }
+  .nav-item.active { background: var(--accent-dim); border-left-color: var(--accent); }
+  .nav-item .nbadge {
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    min-width: 36px;
+    text-align: center;
+  }
+  .nav-item .ntitle { font-size: 12px; line-height: 1.3; }
+
+  /* ── Main panel ── */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-top {
+    padding: 20px 24px 0;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+  }
+  .ep-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .method-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 5px;
+    letter-spacing: .04em;
+  }
+  .ep-title-main { font-size: 18px; font-weight: 500; }
+  .ep-path-main {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .ep-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    gap: 20px;
+  }
+
+  .col-left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .col-right { width: 400px; min-width: 320px; display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-head h4 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .card-body { padding: 14px; }
+
+  /* ── Request body editor ── */
+  .body-editor {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    resize: vertical;
+    min-height: 160px;
+    outline: none;
+    line-height: 1.7;
+    transition: border-color .15s;
+  }
+  .body-editor:focus { border-color: var(--accent); }
+
+  /* ── Params table ── */
+  .params-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .params-table th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 0 8px 8px 0;
+    font-weight: 500;
+  }
+  .params-table td { padding: 5px 8px 5px 0; vertical-align: top; }
+  .params-table td:first-child { font-family: var(--mono); color: var(--accent); white-space: nowrap; }
+  .params-table td:nth-child(2) { color: var(--amber); white-space: nowrap; font-family: var(--mono); font-size: 11px; }
+  .req-tag {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: var(--mono);
+  }
+  .req-yes { background: rgba(248,113,113,.15); color: var(--red); }
+  .req-no { background: rgba(107,114,128,.15); color: var(--muted); }
+  .param-desc { color: var(--muted); line-height: 1.5; }
+
+  /* ── Action row ── */
+  .action-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn-run {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-family: var(--sans);
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-run:hover { opacity: .9; }
+  .btn-run:active { transform: scale(.98); }
+  .btn-run.loading { opacity: .7; cursor: not-allowed; }
+  .btn-copy-curl {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 7px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: var(--mono);
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .btn-copy-curl:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Response ── */
+  .response-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .res-status {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .res-time { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+  .res-body {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 400px;
+    overflow-y: auto;
+    min-height: 80px;
+    color: var(--muted);
+  }
+
+  /* JSON syntax highlight */
+  .json-key { color: #7dd3fc; }
+  .json-str { color: #86efac; }
+  .json-num { color: #fca5a5; }
+  .json-bool { color: var(--purple); }
+  .json-null { color: var(--muted); }
+
+  /* ── curl output ── */
+  .curl-out {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #94a3b8;
+  }
+
+  /* ── Method colors ── */
+  .m-GET    { background: rgba(52,211,153,.15); color: var(--green); }
+  .m-POST   { background: rgba(79,138,255,.15); color: var(--accent); }
+  .m-PUT    { background: rgba(251,191,36,.15); color: var(--amber); }
+  .m-DELETE { background: rgba(248,113,113,.15); color: var(--red); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 99px; }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted);
+    gap: 10px;
+  }
+  .empty-state .big { font-size: 36px; }
+  .empty-state p { font-size: 13px; }
+
+  .notice {
+    font-size: 11px;
+    color: var(--amber);
+    background: var(--amber-dim);
+    border: 1px solid rgba(251,191,36,.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: var(--mono);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 900px) {
+    .panel-body { flex-direction: column; }
+    .col-right { width: 100%; }
+    aside { width: 220px; min-width: 220px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SMART<span>/</span>BOX <span style="color:var(--muted);margin-left:4px">API Tester</span></div>
+  <div class="spacer"></div>
+  <div class="status-dot" id="status-dot"></div>
+  <span class="status-label" id="status-label">not connected</span>
+</header>
+
+<div class="layout">
+
+<!-- Sidebar -->
+<aside>
+  <div class="cfg-panel">
+    <h3>Device config</h3>
+    <div class="field">
+      <label>Base URL</label>
+      <input id="cfg-base" value="http://192.168.1.100" oninput="refresh()" />
+    </div>
+    <div class="field">
+      <label>Username</label>
+      <input id="cfg-user" value="admin" oninput="refresh()" />
+    </div>
+    <div class="field">
+      <label>Password MD5</label>
+      <input id="cfg-pwd" value="e10adc3949ba59abbe56e057f20f883e" oninput="refresh()" />
+      <div class="md5-hint">echo -n "pass" | md5sum</div>
+    </div>
+    <div class="field">
+      <label>Token</label>
+      <div class="token-row">
+        <input id="cfg-tok" placeholder="auto-filled on login" oninput="refresh()" />
+        <button class="btn-sm" onclick="clearToken()">✕</button>
+      </div>
+    </div>
+  </div>
+  <nav id="nav"></nav>
+</aside>
+
+<!-- Main -->
+<main id="main">
+  <div class="empty-state" id="empty">
+    <div class="big">⌨</div>
+    <p>Select an endpoint from the sidebar</p>
+  </div>
+  <div id="ep-view" style="display:none;flex:1;flex-direction:column;overflow:hidden"></div>
+</main>
+
+</div>
+
+<script>
+const ENDPOINTS = [
+  { g:"Auth", m:"POST", t:"Login", p:"/api/v1/user/login",
+    desc:"Obtain a session token. Password must be MD5-hashed. Token is valid for the duration returned in expires (seconds).",
+    params:[{n:"name",type:"String",req:true,d:"Login username"},{n:"pwd",type:"String",req:true,d:"MD5-encrypted password"}],
+    body:()=>JSON.stringify({name:C().u,pwd:C().pw},null,2),
+    afterRun: (res)=>{ try{ const t=JSON.parse(res).data?.token; if(t){ document.getElementById('cfg-tok').value=t; refresh(); setStatus('ok','connected'); }} catch(e){} }
+  },
+  { g:"Auth", m:"POST", t:"Logout", p:"/api/v1/user/logout",
+    params:[{n:"name",type:"String",req:true,d:"Username"},{n:"token",type:"String",req:true,d:"Token to invalidate"}],
+    body:()=>JSON.stringify({name:C().u,token:C().t},null,2),
+    afterRun: ()=>{ document.getElementById('cfg-tok').value=''; refresh(); setStatus('','not connected'); }
+  },
+  { g:"Auth", m:"GET", t:"Update token", p:"/api/v1/user/update_token",
+    desc:"Refreshes the current token validity period.",
+    params:[], body:()=>null
+  },
+
+  { g:"Person library", m:"POST", t:"Add person library", p:"/api/v1/smart/personlib/",
+    desc:"Create a new person library. lib_type 1=Blocklist, 2=Allowlist.",
+    params:[{n:"lib_title",type:"String",req:true,d:"Library name. Max 64 bytes."},{n:"lib_type",type:"Int",req:true,d:"1: Blocklist  2: Allowlist"}],
+    body:()=>JSON.stringify({lib_title:"My Library",lib_type:1},null,2)
+  },
+  { g:"Person library", m:"GET", t:"Query person libraries", p:"/api/v1/smart/personlib/",
+    params:[], body:()=>null
+  },
+  { g:"Person library", m:"PUT", t:"Modify person library", p:"/api/v1/smart/personlib/{lib_id}",
+    desc:"Rename a library. Replace {lib_id} in the path with the actual ID.",
+    params:[{n:"lib_title",type:"String",req:true,d:"New library name."}],
+    body:()=>JSON.stringify({lib_title:"Renamed Library"},null,2)
+  },
+  { g:"Person library", m:"DELETE", t:"Delete person library", p:"/api/v1/smart/personlib/{lib_id}",
+    desc:"Permanently deletes a library and all its members. Replace {lib_id} in the path.",
+    params:[], body:()=>null
+  },
+
+  { g:"Person info", m:"POST", t:"Add person info", p:"/api/v1/smart/personlib/{lib_id}/members",
+    desc:"Add a face to a person library. photo_base64 is required — generate with: base64 -w 0 face.jpg",
+    params:[
+      {n:"name",type:"String",req:true,d:"Person name. Max 255 bytes."},
+      {n:"photo_base64",type:"String",req:true,d:"Base64-encoded JPEG face photo."},
+      {n:"sex",type:"Int",req:false,d:"0=Unknown 1=Male 2=Female 9=Unspecified"},
+      {n:"email",type:"String",req:false,d:"Email address."},
+      {n:"tel",type:"String",req:false,d:"Phone number."},
+      {n:"certificate_type",type:"Int",req:false,d:"0=ID card 2=Passport 3=Driver's license 99=Others"},
+      {n:"certificate_no",type:"String",req:false,d:"ID number."},
+      {n:"birth_date",type:"String",req:false,d:"Birth date."}
+    ],
+    body:()=>JSON.stringify({name:"John Doe",sex:1,email:"",tel:"",certificate_type:99,certificate_no:"",birth_date:"",photo_base64:"<BASE64_JPEG>"},null,2)
+  },
+  { g:"Person info", m:"PUT", t:"Modify person info", p:"/api/v1/smart/personlib/{lib_id}/members",
+    params:[
+      {n:"face_id",type:"Int",req:true,d:"Face ID (from add/query response)."},
+      {n:"name",type:"String",req:false,d:"Updated name."},
+      {n:"photo_base64",type:"String",req:false,d:"Updated face photo."}
+    ],
+    body:()=>JSON.stringify({face_id:1,name:"Jane Doe",sex:2},null,2)
+  },
+  { g:"Person info", m:"DELETE", t:"Delete person info", p:"/api/v1/smart/personlib/members",
+    params:[{n:"lib_id",type:"Int",req:true,d:"Person library ID."},{n:"face_id_list",type:"Int[]",req:true,d:"Array of face IDs to delete."}],
+    body:()=>JSON.stringify({lib_id:1,face_id_list:[1,2]},null,2)
+  },
+  { g:"Person info", m:"POST", t:"Query person info", p:"/api/v1/smart/personlib/{lib_id}/members_list",
+    params:[{n:"page",type:"Int",req:false,d:"Page number. Default: 1."},{n:"size",type:"Int",req:false,d:"Per page. Default/max: 100."},{n:"member_name",type:"String",req:false,d:"Filter by name."}],
+    body:()=>JSON.stringify({page:1,size:100},null,2)
+  },
+
+  { g:"Arming schedule", m:"GET", t:"Get arming schedule", p:"/api/v1/smart/config/weekplan/{channelid}/{tasktype}",
+    desc:"tasktype values: safehatdetection, smokingdetection, callingdetection, facedetection, regionalinvasion, falldetection, maskdetection, and more.",
+    params:[{n:"channelid",type:"Int",req:true,d:"Channel ID (path param)."},{n:"tasktype",type:"String",req:true,d:"Detection type string (path param)."}],
+    body:()=>null
+  },
+  { g:"Arming schedule", m:"PUT", t:"Modify arming schedule", p:"/api/v1/smart/config/weekplan/{channelid}/{tasktype}",
+    desc:"begin/end in minutes 0-1440 (step 30). begin=0,end=0 = disabled. dayid 1=Mon…7=Sun.",
+    params:[{n:"plancfg",type:"Object[]",req:false,d:"Array of {dayid, timesectioninfos:[{begin,end}]}."}],
+    body:()=>JSON.stringify({plancfg:[{dayid:1,timesectioninfos:[{begin:0,end:1440}]},{dayid:2,timesectioninfos:[{begin:0,end:0}]},{dayid:3,timesectioninfos:[{begin:0,end:0}]},{dayid:4,timesectioninfos:[{begin:0,end:0}]},{dayid:5,timesectioninfos:[{begin:0,end:1440}]},{dayid:6,timesectioninfos:[{begin:0,end:0}]},{dayid:7,timesectioninfos:[{begin:0,end:0}]}]},null,2)
+  },
+
+  { g:"Platform integration", m:"GET", t:"Get integration config", p:"/api/v1/notify/config",
+    params:[], body:()=>null
+  },
+  { g:"Platform integration", m:"PUT", t:"Modify integration config", p:"/api/v1/notify/config",
+    desc:"Register your receiver server. link_type: websocket(id=0), http(id=1), http_alive(id=2). Set enabled=1 and your URL.",
+    params:[{n:"link_list",type:"Object[]",req:false,d:"Array of connection config objects."}],
+    body:()=>JSON.stringify({link_list:[{enabled:1,id:1,link_type:"http",pic_enable:1,url:"http://YOUR_SERVER:8080/alarm",video_enable:0,video_url:""}]},null,2)
+  },
+
+  { g:"Upgrade", m:"POST", t:"Upload upgrade package", p:"/bars/v1/patch/upload",
+    desc:"Upload via multipart/form-data. Use curl: curl -F 'file=@firmware.tar.gz'",
+    params:[{n:"file",type:"File",req:false,d:"Firmware .tar.gz file (multipart form-data)."}],
+    body:()=>null, isUpload:true
+  },
+  { g:"Upgrade", m:"POST", t:"Perform upgrade", p:"/bars/v1/patch/update",
+    params:[{n:"name",type:"String",req:true,d:"Firmware filename."},{n:"path",type:"String",req:true,d:"Fixed: /var/fs_disk/aox/patch/filename.tar.gz"}],
+    body:()=>JSON.stringify({name:"firmware.tar.gz",path:"/var/fs_disk/aox/patch/firmware.tar.gz"},null,2)
+  },
+
+  { g:"Work clothes library", m:"POST", t:"Add work clothes library", p:"/api/v1/smart/workclotheslib/workclothesfile",
+    params:[{n:"libname",type:"String",req:true,d:"Max 12 chars — digits, letters, or Chinese only."}],
+    body:()=>JSON.stringify({libname:"WorkLib01"},null,2)
+  },
+  { g:"Work clothes library", m:"GET", t:"Query work clothes libraries", p:"/api/v1/smart/workclotheslib/workclothesfile",
+    params:[], body:()=>null
+  },
+  { g:"Work clothes library", m:"PUT", t:"Modify work clothes library", p:"/api/v1/smart/workclotheslib/workclothesfile/{libid}",
+    params:[{n:"libname",type:"String",req:true,d:"New library name."}],
+    body:()=>JSON.stringify({libname:"RenamedLib"},null,2)
+  },
+  { g:"Work clothes library", m:"DELETE", t:"Delete work clothes library", p:"/api/v1/smart/workclotheslib/workclothesfile/{libid}",
+    params:[], body:()=>null
+  },
+
+  { g:"Work clothes", m:"POST", t:"Add work clothes", p:"/api/v1/smart/workclotheslib/workclothesfile/{libid}/workclothes",
+    params:[{n:"base64text",type:"Array",req:true,d:"Array of base64-encoded work clothes images."}],
+    body:()=>JSON.stringify({base64text:["<BASE64_IMAGE>"]},null,2)
+  },
+  { g:"Work clothes", m:"GET", t:"Query work clothes (basic)", p:"/api/v1/smart/workclotheslib/workclothesfile/{libid}/workclothes",
+    desc:"Query params: ?page=1&size=10",
+    params:[], body:()=>null
+  },
+  { g:"Work clothes", m:"POST", t:"Query work clothes (with modeling)", p:"/api/v1/smart/workclotheslib/workclothesfile/{libid}/search",
+    desc:"Recommended over the GET version. modeling_type 255 = all.",
+    params:[{n:"page",type:"Int",req:true,d:"Page number."},{n:"size",type:"Int",req:true,d:"Items per page."},{n:"modeling_type",type:"String",req:false,d:"0=not started 1=succeeded 2=failed 255=all"}],
+    body:()=>JSON.stringify({page:1,size:10,modeling_type:255},null,2)
+  },
+  { g:"Work clothes", m:"DELETE", t:"Delete work clothes", p:"/api/v1/smart/workclotheslib/workclothesfile/{libid}/workclothes",
+    params:[{n:"clothesid_list",type:"Object[]",req:true,d:"Array of work clothes IDs to delete."}],
+    body:()=>JSON.stringify({clothesid_list:[1,2]},null,2)
+  },
+
+  { g:"Channel management", m:"POST", t:"Add channel", p:"/api/v1/channel/add/{channelid}",
+    desc:"channelid: 1-8. For RTSP cameras omit url/port/username/pwd and include rtsp and encoding fields instead.",
+    params:[
+      {n:"name",type:"String",req:true,d:"Channel name."},
+      {n:"type",type:"String",req:true,d:"Camera protocol: onvif or rtsp"},
+      {n:"transport_type",type:"String",req:true,d:"tcp or udp"},
+      {n:"url",type:"String",req:false,d:"Camera IP (Onvif only)."},
+      {n:"port",type:"String",req:false,d:"Port (Onvif only)."},
+      {n:"username",type:"String",req:false,d:"Onvif account (Onvif only)."},
+      {n:"pwd",type:"String",req:false,d:"Onvif password (Onvif only)."},
+      {n:"rtsp",type:"String",req:false,d:"RTSP stream URL (RTSP only)."},
+      {n:"encoding",type:"String",req:false,d:"H.264 or H.265 (RTSP only)."}
+    ],
+    body:()=>JSON.stringify({name:"south entrance",type:"onvif",url:"192.168.1.112",port:"80",username:"admin",pwd:"Admin1234",transport_type:"tcp"},null,2)
+  },
+  { g:"Channel management", m:"GET", t:"Query all channels", p:"/api/v1/channel/",
+    params:[], body:()=>null
+  },
+  { g:"Channel management", m:"DELETE", t:"Delete channel", p:"/api/v1/channel/",
+    params:[{n:"id_list",type:"Int[]",req:true,d:"Array of channel IDs to delete."}],
+    body:()=>JSON.stringify({id_list:[1,2]},null,2)
+  },
+
+  { g:"Face monitoring", m:"POST", t:"Add face monitoring task", p:"/api/v1/smart/config/faceguard/{channel_id}",
+    desc:"guardtype: 0=All, 1=Match only, 2=Not match only. threshold: 0-100 (80 recommended).",
+    params:[
+      {n:"enable",type:"Bool",req:true,d:"Enable monitoring."},
+      {n:"guardreason",type:"String",req:true,d:"Description/cause."},
+      {n:"guardtype",type:"Int",req:true,d:"0=All 1=Match 2=Not match"},
+      {n:"libid",type:"Object[]",req:true,d:"Array of person library IDs."},
+      {n:"libtype",type:"Int",req:true,d:"1=Blocklist 2=Allowlist"},
+      {n:"taskname",type:"String",req:true,d:"Task name."},
+      {n:"threshold",type:"Int",req:true,d:"Alarm threshold 0-100."}
+    ],
+    body:()=>JSON.stringify({enable:true,guardreason:"face comparison",guardtype:0,libid:[1],libtype:1,taskname:"entrance-monitor",threshold:80},null,2)
+  },
+  { g:"Face monitoring", m:"GET", t:"Query face monitoring tasks", p:"/api/v1/smart/config/faceguard/{channel_id}",
+    params:[], body:()=>null
+  },
+  { g:"Face monitoring", m:"PUT", t:"Modify face monitoring task", p:"/api/v1/smart/config/faceguard/{guardid}",
+    params:[
+      {n:"channelid",type:"Int",req:true,d:"Channel ID."},
+      {n:"guardid",type:"Int",req:true,d:"Task ID (from query)."},
+      {n:"enable",type:"Bool",req:true,d:"Enable/disable."},
+      {n:"threshold",type:"Int",req:true,d:"New threshold."}
+    ],
+    body:()=>JSON.stringify({channelid:1,enable:true,guardid:1,guardreason:"updated reason",guardtype:0,libid:[1],libtype:1,taskname:"updated-task",threshold:75},null,2)
+  },
+  { g:"Face monitoring", m:"DELETE", t:"Delete face monitoring task", p:"/api/v1/smart/config/faceguard",
+    params:[{n:"guardids",type:"Object[]",req:true,d:"Array of task IDs to delete."}],
+    body:()=>JSON.stringify({guardids:[1]},null,2)
+  },
+
+  { g:"Analysis task config", m:"PUT", t:"Configure analysis task", p:"/api/v1/smart/config/task/all/{channelid}",
+    desc:"task_type: ba (behavior) or face. event array in rules controls which detections are active. Points use per-ten-thousand coords (0-10000). Returns code 2106 if computing power exceeded.",
+    params:[
+      {n:"task_type",type:"String",req:true,d:"ba or face"},
+      {n:"params",type:"Object",req:true,d:"ba/face/extend config objects."},
+      {n:"rules",type:"Object[]",req:true,d:"Detection areas with event types and polygon points."}
+    ],
+    body:()=>JSON.stringify({task_type:"ba",params:{ba:{alarmvideoen:1,afteralarmedtime:5,beforalarmedtime:5,leaveduration:10,sleepduration:300,fallduration:5,goodsmoveduration:1,pwoccupyduration:5,erroccupyduration:20,areapersabnduration:1,areapersabnnumlimit:2,warnpersonnumlimit:1,loiteringduration:5,playphoneduration:10,enterinduration:5,linedpcenable:0,linedpctime:0,minpersonobjectheight:0,minpersonobjectwidth:0,maxpersonobjectheight:1000,maxpersonobjectwidth:1500,libid:""},face:{faceopttype:"capoptbest",faceoptfasttime:1,faceoptcyclevalue:1,minsize:{height:10,width:10}},extend:{enable:1,config:[{safehatdetection:{sensitive:80,reportrate:0}},{smokingdetection:{sensitive:85,reportrate:5}}]}},rules:[{id:0,type:"polygon",direct:1,event:["safehatdetection","smokingdetection"],points:[{x:"0",y:"0"},{x:"0",y:"10000"},{x:"10000",y:"10000"},{x:"10000",y:"0"}]}]},null,2)
+  },
+  { g:"Analysis task config", m:"GET", t:"Query tasks (specific channel)", p:"/api/v1/smart/config/task/all/{channelid}",
+    params:[], body:()=>null
+  },
+  { g:"Analysis task config", m:"GET", t:"Query tasks (all channels)", p:"/api/v1/smart/config/task/all",
+    params:[], body:()=>null
+  },
+
+  { g:"Data retrieval", m:"POST", t:"Behavior analysis retrieval ★", p:"/api/v1/smart/search/bacap",
+    desc:"Main integration endpoint — query historical behavior alarm records. Timestamps are 13-digit millisecond Unix. Response includes bigpicurl (prepend device IP to fetch images). alarmtype list covers all 24 detection types.",
+    params:[
+      {n:"page",type:"Int",req:true,d:"Page number."},
+      {n:"size",type:"Int",req:true,d:"Records per page."},
+      {n:"channelid",type:"Object[]",req:true,d:"Array of channel IDs to query."},
+      {n:"starttime",type:"Int",req:true,d:"Start time — 13-digit ms timestamp."},
+      {n:"endtime",type:"Int",req:true,d:"End time — 13-digit ms timestamp."},
+      {n:"alarmtype",type:"Int[]",req:true,d:"Alarm types: 4=no helmet, 5=no work clothes, 6=calling, 7=smoking, 16=sleep on duty, 17=absence, 18=evac route, 19=object removed, 20=intrusion, 22=illegal parking, 33=no mask, 35=area count, 45=tripwire count, 46=fight, 57=long stay, 62=fall, 63=people limit, 65=no reflective clothing, 108=smoke, 114=mobile phone, 124=fire, 182=enter area, 183=leave area, 184=cross line"}
+    ],
+    body:()=>{
+      const now=Date.now();
+      const start=now - 86400000;
+      return JSON.stringify({page:1,size:15,channelid:[1,2],starttime:start,endtime:now,alarmtype:[4,5,6,7,16,17,18,19,20,22,33,35,45,46,57,62,63,65,108,114,124,182,183,184]},null,2);
+    }
+  },
+  { g:"Data retrieval", m:"POST", t:"Face snapshot retrieval", p:"/api/v1/smart/search/structurecap",
+    desc:"captype is fixed to [11]. faceattr filters use 255 for 'all'.",
+    params:[
+      {n:"page",type:"Int",req:true,d:"Page number."},
+      {n:"size",type:"Int",req:true,d:"Records per page."},
+      {n:"channelid",type:"Object[]",req:true,d:"Channel IDs."},
+      {n:"starttime",type:"Int",req:true,d:"Start time — 13-digit ms timestamp."},
+      {n:"endtime",type:"Int",req:true,d:"End time — 13-digit ms timestamp."},
+      {n:"captype",type:"Object[]",req:true,d:"Fixed to [11]."},
+      {n:"faceattr",type:"Object",req:true,d:"gender/age/glass/mask — use 255 for all."}
+    ],
+    body:()=>{
+      const now=Date.now();
+      return JSON.stringify({page:1,size:15,captype:[11],channelid:[1,2],starttime:now-86400000,endtime:now,faceattr:{gender:255,age:255,glass:255,mask:255}},null,2);
+    }
+  },
+  { g:"Data retrieval", m:"POST", t:"Face comparison retrieval", p:"/api/v1/smart/search/facematch",
+    desc:"cmptype: 0=All, 1=Match, 2=Not match. Optionally filter by name or certificate_no.",
+    params:[
+      {n:"page",type:"Int",req:true,d:"Page number."},
+      {n:"size",type:"Int",req:true,d:"Records per page."},
+      {n:"channelid",type:"Object[]",req:true,d:"Channel IDs."},
+      {n:"starttime",type:"Int",req:true,d:"13-digit ms timestamp."},
+      {n:"endtime",type:"Int",req:true,d:"13-digit ms timestamp."},
+      {n:"cmptype",type:"String",req:false,d:"0=All 1=Match 2=Not match"},
+      {n:"name",type:"String",req:false,d:"Filter by person name."},
+      {n:"certificate_no",type:"String",req:false,d:"Filter by ID number."},
+      {n:"faceattr",type:"Object",req:true,d:"gender/age/glass/mask."}
+    ],
+    body:()=>JSON.stringify({page:1,size:15,channelid:[1,2],starttime:Date.now()-86400000,endtime:Date.now(),name:"",certificate_no:"",cmptype:0,faceattr:{gender:255,age:255,glass:255,mask:255}},null,2)
+  },
+  { g:"Data retrieval", m:"POST", t:"Behavior + face comparison retrieval", p:"/api/v1/smart/search/bamatch",
+    desc:"Combined query — returns behavior alarms with face match results in one call.",
+    params:[
+      {n:"page",type:"Int",req:true,d:"Page number."},
+      {n:"size",type:"Int",req:true,d:"Records per page."},
+      {n:"channelid",type:"Object[]",req:true,d:"Channel IDs."},
+      {n:"starttime",type:"Int",req:true,d:"13-digit ms timestamp."},
+      {n:"endtime",type:"Int",req:true,d:"13-digit ms timestamp."},
+      {n:"cmptype",type:"String",req:false,d:"0=All 1=Match 2=Not match"},
+      {n:"alarmtype",type:"Object[]",req:true,d:"Same alarm type list as behavior retrieval."}
+    ],
+    body:()=>JSON.stringify({page:1,size:15,channelid:[1,2],starttime:Date.now()-86400000,endtime:Date.now(),name:"",certificate_no:"",cmptype:1,alarmtype:[4,5,6,7,16,17,18,19,20,22,33,35,45,46,57,62,63,65,108,114,124,182,183,184]},null,2)
+  },
+
+  { g:"Algorithm capabilities", m:"GET", t:"Query algorithm capabilities", p:"/api/v1/smart/config/ability",
+    desc:"Returns all detection algorithm types supported by this device.",
+    params:[], body:()=>null
+  },
+];
+
+let activeIdx = null;
+
+function C(){ return { b: document.getElementById('cfg-base').value.replace(/\/$/,''), u: document.getElementById('cfg-user').value, pw: document.getElementById('cfg-pwd').value, t: document.getElementById('cfg-tok').value||'YOUR_TOKEN' }; }
+
+function refresh(){ if(activeIdx!==null) renderEp(activeIdx); }
+function clearToken(){ document.getElementById('cfg-tok').value=''; refresh(); }
+function setStatus(cls,label){ const d=document.getElementById('status-dot'); d.className='status-dot '+(cls||''); document.getElementById('status-label').textContent=label; }
+
+function buildNav(){
+  const nav=document.getElementById('nav');
+  const groups={};
+  ENDPOINTS.forEach((ep,i)=>{ if(!groups[ep.g]) groups[ep.g]=[]; groups[ep.g].push({ep,i}); });
+  Object.entries(groups).forEach(([g,items])=>{
+    const lbl=document.createElement('div'); lbl.className='nav-group-label'; lbl.textContent=g; nav.appendChild(lbl);
+    items.forEach(({ep,i})=>{
+      const item=document.createElement('div'); item.className='nav-item'; item.id='nav-'+i;
+      item.innerHTML=`<span class="nbadge m-${ep.m}">${ep.m}</span><span class="ntitle">${ep.t}</span>`;
+      item.onclick=()=>selectEp(i); nav.appendChild(item);
+    });
+  });
+}
+
+function selectEp(idx){
+  if(activeIdx!==null){ const prev=document.getElementById('nav-'+activeIdx); if(prev) prev.classList.remove('active'); }
+  activeIdx=idx;
+  document.getElementById('nav-'+idx).classList.add('active');
+  document.getElementById('empty').style.display='none';
+  const epv=document.getElementById('ep-view'); epv.style.display='flex';
+  renderEp(idx);
+}
+
+function renderEp(idx){
+  const ep=ENDPOINTS[idx]; const c=C();
+  const hasBody=ep.body()!==null;
+  const isTok=ep.t==='YOUR_TOKEN';
+
+  const curlCmd=buildCurl(ep,c);
+
+  document.getElementById('ep-view').innerHTML=`
+    <div class="panel-top">
+      <div class="ep-header">
+        <span class="method-badge m-${ep.m}">${ep.m}</span>
+        <span class="ep-title-main">${ep.t}</span>
+      </div>
+      <div class="ep-path-main">${c.b}${ep.p}</div>
+      ${ep.desc?`<div class="ep-desc">${ep.desc}</div>`:''}
+    </div>
+    <div class="panel-body">
+      <div class="col-left">
+        ${isTok&&ep.t!=='Login'?`<div class="notice">⚠ No token set — run Login first to get a token, or paste one in the config panel.</div>`:''}
+        ${ep.isUpload?`<div class="card"><div class="card-head"><h4>Note</h4></div><div class="card-body"><div class="ep-desc">File upload requires curl or a tool like Postman. Use the curl command on the right.</div></div></div>`:''}
+        ${hasBody?`
+        <div class="card">
+          <div class="card-head">
+            <h4>Request body</h4>
+            <button class="btn-sm" onclick="resetBody(${idx})">Reset</button>
+          </div>
+          <div class="card-body">
+            <textarea class="body-editor" id="body-editor" spellcheck="false">${ep.body()}</textarea>
+          </div>
+        </div>`:''}
+        <div class="action-row">
+          <button class="btn-run" id="btn-run" onclick="runReq(${idx})">
+            <span id="run-icon">▶</span> Send request
+          </button>
+          <button class="btn-copy-curl" onclick="copyCurl()">Copy curl</button>
+        </div>
+        <div class="card" id="res-card" style="display:none">
+          <div class="card-head">
+            <h4>Response</h4>
+            <div class="response-meta">
+              <span class="res-status" id="res-status"></span>
+              <span class="res-time" id="res-time"></span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="res-body" id="res-body">—</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-right">
+        ${ep.params.length?`
+        <div class="card">
+          <div class="card-head"><h4>Parameters</h4></div>
+          <div class="card-body">
+            <table class="params-table">
+              <thead><tr><th>Name</th><th>Type</th><th>Req</th><th>Description</th></tr></thead>
+              <tbody>
+                ${ep.params.map(p=>`<tr>
+                  <td>${p.n}</td>
+                  <td>${p.type}</td>
+                  <td><span class="req-tag ${p.req?'req-yes':'req-no'}">${p.req?'Yes':'No'}</span></td>
+                  <td class="param-desc">${p.d}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>`:''}
+        <div class="card">
+          <div class="card-head">
+            <h4>curl equivalent</h4>
+            <button class="btn-sm" onclick="copyCurl()">Copy</button>
+          </div>
+          <div class="card-body">
+            <div class="curl-out" id="curl-out">${escHtml(curlCmd)}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  
+  document.getElementById('body-editor')?.addEventListener('input', ()=>updateCurl(idx));
+  window._curlCmd=curlCmd;
+}
+
+function updateCurl(idx){
+  const ep=ENDPOINTS[idx]; const c=C();
+  const curlCmd=buildCurl(ep,c);
+  const co=document.getElementById('curl-out'); if(co) co.textContent=curlCmd;
+  window._curlCmd=curlCmd;
+}
+
+function buildCurl(ep,c){
+  const bodyRaw=document.getElementById('body-editor')?.value ?? ep.body();
+  const hasBody=bodyRaw!==null;
+  const method=ep.isUpload?'POST':ep.m;
+  let cmd=`curl -s -X ${method} "${c.b}${ep.p}"`;
+  if(ep.m!=='GET'&&ep.m!=='DELETE'||hasBody) cmd+=` \\\n  -H "Content-Type: application/json"`;
+  if(ep.p!=='/api/v1/user/login') cmd+=` \\\n  -H "Authorization: ${c.t}"`;
+  if(ep.isUpload) cmd=cmd.replace('application/json','multipart/form-data')+` \\\n  -F "file=@/path/to/firmware.tar.gz"`;
+  else if(hasBody&&bodyRaw) cmd+=` \\\n  -d '${bodyRaw.replace(/\n/g,'').replace(/\s{2,}/g,' ')}'`;
+  return cmd;
+}
+
+async function runReq(idx){
+  const ep=ENDPOINTS[idx]; const c=C();
+  if(ep.isUpload){ alert('File upload is not supported in the browser — use the curl command instead.'); return; }
+  const btn=document.getElementById('btn-run');
+  btn.classList.add('loading'); btn.innerHTML='<span>⏳</span> Sending…';
+  const bodyRaw=document.getElementById('body-editor')?.value??null;
+  const t0=performance.now();
+  try{
+    const opts={method:ep.m,headers:{'Content-Type':'application/json'}};
+    if(ep.p!=='/api/v1/user/login') opts.headers['Authorization']=c.t;
+    if(bodyRaw&&ep.m!=='GET') opts.body=bodyRaw;
+    const res=await fetch(c.b+ep.p,opts);
+    const ms=Math.round(performance.now()-t0);
+    const text=await res.text();
+    showRes(res.status,ms,text);
+    if(ep.afterRun) ep.afterRun(text);
+    if(res.ok) setStatus('ok','connected'); else setStatus('err',`error ${res.status}`);
+  }catch(e){
+    const ms=Math.round(performance.now()-t0);
+    showRes(0,ms,'Network error: '+e.message+'\n\nMake sure the device IP is reachable and CORS is not blocked.\nIf CORS is blocked, use the curl command in a terminal instead.');
+    setStatus('err','unreachable');
+  }
+  btn.classList.remove('loading'); btn.innerHTML='<span>▶</span> Send request';
+}
+
+function showRes(status,ms,text){
+  const card=document.getElementById('res-card'); card.style.display='';
+  const st=document.getElementById('res-status');
+  const isOk=status>=200&&status<300;
+  st.textContent=status||'ERR';
+  st.className='res-status '+(status===0?'m-DELETE':isOk?'m-GET':'m-DELETE');
+  document.getElementById('res-time').textContent=ms+'ms';
+  try{ document.getElementById('res-body').innerHTML=syntaxHighlight(JSON.stringify(JSON.parse(text),null,2)); }
+  catch(e){ document.getElementById('res-body').textContent=text; }
+}
+
+function syntaxHighlight(json){
+  return json.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,m=>{
+      let cls='json-num';
+      if(/^"/.test(m)){ cls=/:$/.test(m)?'json-key':'json-str'; }
+      else if(/true|false/.test(m)) cls='json-bool';
+      else if(/null/.test(m)) cls='json-null';
+      return `<span class="${cls}">${m}</span>`;
+    });
+}
+
+function resetBody(idx){ const ed=document.getElementById('body-editor'); if(ed){ ed.value=ENDPOINTS[idx].body()||''; updateCurl(idx); } }
+function copyCurl(){ navigator.clipboard.writeText(window._curlCmd||'').then(()=>{ const b=document.querySelector('.btn-copy-curl'); if(b){b.textContent='Copied!';setTimeout(()=>b.textContent='Copy curl',1500);} }); }
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+buildNav();
+</script>
+</body>
+</html>
