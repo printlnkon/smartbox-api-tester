@@ -1995,7 +1995,7 @@
           <button class="btn-run" id="btn-run" onclick="runReq(${endpointIndex})">
             <span id="run-icon">▶</span> Send request
           </button>
-          <button class="btn-copy-curl" onclick="copyCurl()">Copy curl</button>
+          <button class="btn-copy-curl" onclick="copyCurl(this)">Copy curl</button>
         </div>
         <div class="card" id="res-card" style="display:none">
           <div class="card-head">
@@ -2039,7 +2039,7 @@
         <div class="card">
           <div class="card-head">
             <h4>curl equivalent</h4>
-            <button class="btn-sm" onclick="copyCurl()">Copy</button>
+            <button class="btn-sm" onclick="copyCurl(this)">Copy</button>
           </div>
           <div class="card-body">
             <div class="curl-out" id="curl-out">${escHtml(curlCommand)}</div>
@@ -2178,13 +2178,42 @@
           updateCurl(endpointIndex);
         }
       }
-      function copyCurl() {
-        navigator.clipboard.writeText(window._curlCommand || "").then(() => {
-          const copyButton = document.querySelector(".btn-copy-curl");
-          if (copyButton) {
-            copyButton.textContent = "Copied!";
-            setTimeout(() => (copyButton.textContent = "Copy curl"), 1500);
-          }
+      function copyCurl(buttonEl) {
+        const text = window._curlCommand || "";
+        if (!text) return;
+        copyTextToClipboard(text)
+          .then(() => {
+            const button = buttonEl || document.querySelector(".btn-copy-curl");
+            if (!button) return;
+            const original = button.textContent || "Copy";
+            button.textContent = "Copied!";
+            setTimeout(() => (button.textContent = original), 1500);
+          })
+          .catch(() => {
+            alert(
+              "Clipboard access failed. Copy the curl command manually from the panel.",
+            );
+          });
+      }
+
+      function copyTextToClipboard(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text);
+        }
+        return new Promise((resolve, reject) => {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.left = "-9999px";
+          textarea.style.top = "0";
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(textarea);
+          if (ok) resolve();
+          else reject(new Error("copy failed"));
         });
       }
       function escHtml(text) {
