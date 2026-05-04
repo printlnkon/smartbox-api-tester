@@ -1,6 +1,16 @@
 # Smartbox API Tester
 
-Single-page HTML tool for exercising Smartbox device APIs with a friendly UI and curl output.
+Local web-based tester for interacting with Smartbox device APIs.
+
+## System and hardware specifications
+
+- Smartbox model: NV - Edge Computing Server ECS-504B-SF-HD
+- Operating system: Linux
+- Distribution: Zorin OS
+
+## Requirements
+
+- Network connectivity: the Smartbox device and the testing machine must be on the same local network.
 
 ## Quick start
 
@@ -8,7 +18,7 @@ Single-page HTML tool for exercising Smartbox device APIs with a friendly UI and
 2. Set Base URL to your device host, for example: `http://192.168.1.100:30000`.
 3. Enter username and the MD5 password hash.
 4. Run the Login endpoint to auto-fill the token.
-5. Pick any endpoint, fill Path params (if shown), adjust the request body, and send.
+5. Choose an endpoint, fill Path params (if shown), adjust the request body, and send.
 
 MD5 helper:
 
@@ -18,25 +28,12 @@ echo -n "pass" | md5sum
 
 ## Features
 
-- Sidebar endpoint browser grouped by feature area.
+- Endpoint browser grouped by feature area.
 - Live request body editor with reset.
 - Path params panel for `{placeholder}` values.
-- curl equivalent output and copy button.
-- Response panel with JSON syntax highlighting.
+- Curl equivalent output with copy button.
+- Response viewer with JSON syntax highlighting.
 - Auto token capture on Login.
-
-## Path params
-
-Endpoints with placeholders like `{lib_id}` or `{channelid}` show a Path params card.
-Fill the values there to replace the placeholder in the URL and curl output.
-If a value is left blank, the placeholder stays in the path.
-
-Example: Add channel uses `/api/v1/channel/add/{channelid}` where `channelid` is typically 1-4.
-
-## File upload endpoints
-
-The Upload upgrade package endpoint is marked as upload-only in the UI.
-Browser uploads are not supported; use the curl command from the right panel.
 
 ## Endpoint groups
 
@@ -53,6 +50,87 @@ Browser uploads are not supported; use the curl command from the right panel.
 - Analysis task config
 - Data retrieval
 - Algorithm capabilities
+
+## Path params
+
+Endpoints with placeholders like `{lib_id}` or `{channelid}` show a Path params card.
+Fill the values there to replace the placeholder in the URL and curl output.
+If a value is left blank, the placeholder stays in the path.
+
+Example: Add channel uses `/api/v1/channel/add/{channelid}` where `channelid` is typically 1-4.
+
+## File upload endpoints
+
+The Upload upgrade package endpoint is marked as upload-only in the UI.
+Browser uploads are not supported; use the curl command from the right panel.
+
+## Local deployment via NGINX
+
+Use this to host the tester locally from your machine.
+
+### 1. Optional: set a local domain
+
+Edit your hosts file to add a local domain:
+
+```bash
+sudo nano /etc/hosts
+```
+
+Add this line:
+
+```text
+127.0.0.1   smartbox-api.test
+```
+
+Save and exit.
+
+In nano:
+
+```text
+Ctrl + O, Enter, Ctrl + X
+```
+
+### 2. Create the NGINX site config
+
+```bash
+cd /etc/nginx/sites-available
+sudo nano smartbox-api-tester.conf
+```
+
+Paste this configuration and update the `root` path if needed:
+
+```nginx
+server {
+	listen 3000;
+	server_name smartbox-api.test;
+	root /path/to/smartbox-api-tester;
+	index smartbox-api-tester.html;
+
+	location / {
+		try_files $uri /smartbox-api-tester.html;
+	}
+}
+```
+
+Enable the site and reload NGINX:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/smartbox-api-tester.conf /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Open the tester:
+
+```text
+http://smartbox-api.test:3000
+```
+
+### Notes
+
+- Ensure the Smartbox and local machine are on the same network.
+- Check firewall settings if the page is not accessible.
+- Make sure port 3000 is free.
 
 ## Notes and troubleshooting
 
