@@ -100,7 +100,7 @@ Example: Add channel uses `/api/v1/channel/add/{channelid}` where `channelid` is
 
 Use this to host the tester locally from your machine.
 
-### 1. Optional: set a local domain
+### 1. Set a local domain
 
 Edit your hosts file to add a local domain:
 
