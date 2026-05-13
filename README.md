@@ -12,7 +12,7 @@ The **Smartbox API Tester** is designed to help developers explore, test, and de
 
 ## 🖥️ System & Hardware Specifications
 
-- **Smartbox Model:** NV - Edge Computing Server ECS-504B-SF-HD  
+- **Smartbox Model:** UNV - Edge Computing Server ECS-504B-SF-HD  
 - **Operating System:** Linux  
 - **Distribution:** Zorin OS  
 
