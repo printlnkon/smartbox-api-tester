@@ -6,6 +6,8 @@ import {
 } from "./config.js";
 import { buildSpec } from "./spec-builder.js";
 
+let pendingStatusMessage = null;
+
 function mountSwagger() {
   const spec = buildSpec();
   state.swagger = SwaggerUIBundle({
@@ -33,16 +35,20 @@ function mountSwagger() {
     layout: "BaseLayout",
 
     onComplete: () => {
-      setStatus(`Loaded ${Object.keys(spec.paths).length} paths`);
+      setStatus(
+        pendingStatusMessage || `Loaded ${Object.keys(spec.paths).length} paths`,
+      );
+      pendingStatusMessage = null;
       syncAuthorizeButton();
+      populateGroupJump();
     },
   });
 }
 
 function reloadSwagger() {
   document.getElementById("swagger-ui").innerHTML = "";
+  pendingStatusMessage = "Refreshed API specs";
   mountSwagger();
-  setStatus("Spec reloaded");
 }
 
 document.getElementById("reload-spec").addEventListener("click", reloadSwagger);
@@ -57,5 +63,45 @@ for (const id of ["base-url", "username", "password-md5", "token"]) {
     if (id === "token") syncAuthorizeButton();
   });
 }
+
+function populateGroupJump() {
+  setTimeout(() => {
+    const select = document.getElementById("group-jump");
+
+    const tags = [...document.querySelectorAll("[data-tag]")]
+      .map((el) => el.getAttribute("data-tag"))
+      .filter(Boolean);
+
+    const unique = [...new Set(tags)];
+
+    if (unique.length === 0) {
+      setTimeout(populateGroupJump, 500);
+      return;
+    }
+
+    select.innerHTML = `<option value="">Select Group</option>`;
+    for (const tag of unique) {
+      const opt = document.createElement("option");
+      opt.value = tag;
+      opt.textContent = tag;
+      select.appendChild(opt);
+    }
+  }, 300);
+}
+
+document.getElementById("group-jump").addEventListener("change", (e) => {
+  const tag = e.target.value;
+  if (!tag) return;
+
+  const target = [...document.querySelectorAll("[data-tag]")].find(
+    (el) => el.getAttribute("data-tag") === tag,
+  );
+
+  if (target) {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  e.target.value = "";
+});
 
 mountSwagger();

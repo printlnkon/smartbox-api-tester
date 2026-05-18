@@ -120,7 +120,7 @@ export function buildSpec() {
       version: "1.0.0",
       description: "Model: ECS-504B-SF-HD",
     },
-    servers: [{ url: config.baseUrl || "/", description: "Device base URL" }],
+    servers: [{ url: config.baseUrl || "/", description: "Base URL" }],
     components: {
       securitySchemes: {
         tokenAuth: { type: "apiKey", in: "header", name: "Authorization" },

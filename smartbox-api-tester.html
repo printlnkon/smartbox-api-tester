@@ -3,44 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smartbox API</title>
+    <title>Smartbox OpenAPI | Documentation</title>
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"/>
     <link rel="stylesheet" href="index.css" />
   </head>
 
   <body>
     <div class="config-bar">
-      <label>Base URL
-        <input
-          id="base-url"
-          value="http://10.191.15.192:30000/"
-          style="width: 220px"
-        />
-      </label>
-      
-      <label>Username
-        <input id="username" value="admin" style="width: 250px" />
-      </label>
-      
-      <label>Password MD5
-        <input
-          id="password-md5"
-          value="e10adc3949ba59abbe56e057f20f883e"
-          style="width: 260px"
-        />
-      </label>
-      
-      <label>Token
-        <input
-          id="token"
-          placeholder="Paste token or use Login endpoint"
-          style="width: 300px"
-        />
-      </label>
 
-      <button id="reload-spec">Refresh</button>
-      <button class="secondary" id="clear-token">Clear Token</button>
-      <span id="status-line">Ready</span>
+      <!-- Row 1: branding + status -->
+      <div class="config-bar-top">
+        <!-- <div class="config-bar-brand">
+          <div class="brand-dot"></div>
+          <span>Smartbox OpenAPI Tester</span>
+        </div> -->
+        <span id="status-line">Ready</span>
+      </div>
+
+      <!-- Row 2: inputs + actions -->
+      <div class="config-bar-main">
+        <div class="config-bar-inputs">
+          <label>Base URL
+            <input id="base-url" value="http://10.191.15.192:30000/" style="width: 210px" />
+          </label>
+          <label>Username
+            <input id="username" value="admin" style="width: 120px" />
+          </label>
+          <label>Password MD5
+            <input id="password-md5" value="e10adc3949ba59abbe56e057f20f883e" style="width: 250px" />
+          </label>
+          <label>Token
+            <input id="token" placeholder="Paste token or use Login endpoint" style="width: 280px" />
+          </label>
+        </div>
+
+        <div class="config-bar-actions">
+          <label>Jump to
+            <select id="group-jump">
+              <option value="">Select group…</option>
+            </select>
+          </label>
+          <button id="reload-spec">Refresh</button>
+          <button id="clear-token">Clear Token</button>
+        </div>
+      </div>
+
     </div>
 
     <div id="swagger-ui"></div>
