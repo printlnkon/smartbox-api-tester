@@ -61,6 +61,7 @@ document.getElementById("clear-token").addEventListener("click", () => {
 for (const id of ["base-url", "username", "password-md5", "token"]) {
   document.getElementById(id).addEventListener("change", () => {
     if (id === "token") syncAuthorizeButton();
+    if (id === "base-url") reloadSwagger();
   });
 }
 
