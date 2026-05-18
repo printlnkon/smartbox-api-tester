@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f5f5f5;
+  font-family: sans-serif;
+  color: #3b4151;
+}
+
+/* ── Header shell ── */
+.config-bar {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 10px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-bottom: 1px solid #d9d9d9;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* ── Top strip: branding + status ── */
+.config-bar-top {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+  padding: 8px 0 10px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.config-bar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-bar-brand .brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #49cc90;
+  box-shadow: 0 0 0 3px rgba(73, 204, 144, 0.14);
+}
+
+.config-bar-brand span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3b4151;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#status-line {
+  font-size: 12px;
+  font-family: monospace;
+  color: #777;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+/* ── Main row: inputs + actions ── */
+.config-bar-main {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  padding: 10px 0 0;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ── Input group ── */
+.config-bar-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  flex: 1;
+}
+
+.config-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #3b4151;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.config-bar input {
+  width: 280px !important;
+  padding: 7px 10px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  color: #3b4151;
+  font-size: 12px;
+  font-family: monospace;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+}
+
+.config-bar input::placeholder {
+  color: #9a9a9a;
+}
+
+.config-bar input:focus {
+  outline: none;
+  border-color: #49cc90;
+  box-shadow: 0 0 0 2px rgba(73, 204, 144, 0.2);
+}
+
+/* ── Actions group ── */
+.config-bar-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.config-bar select {
+  padding: 7px 10px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  color: #3b4151;
+  font-size: 12px;
+  font-family: sans-serif;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.config-bar select:focus {
+  outline: none;
+  border-color: #49cc90;
+  box-shadow: 0 0 0 2px rgba(73, 204, 144, 0.2);
+}
+
+.config-bar button {
+  padding: 7px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: sans-serif;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.config-bar button:active {
+  transform: scale(0.97);
+}
+
+/* Primary — Refresh */
+#reload-spec {
+  background: #49cc90;
+  color: #fff;
+  box-shadow: none;
+}
+
+#reload-spec:hover {
+  background: #3dbd80;
+}
+
+/* Secondary — Clear Token */
+#clear-token {
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  color: #555;
+}
+
+#clear-token:hover {
+  background: #f5f5f5;
+  border-color: #d0d0d0;
+  color: #333;
+}
+
+/* ── SwaggerUI container ── */
+#swagger-ui {
+  max-width: 1200px;
+  width: 100%;
+  box-sizing: border-box;
+}
