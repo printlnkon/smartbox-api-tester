@@ -1,0 +1,92 @@
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f5f5f5;
+}
+
+.config-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid #d9d9d9;
+  font-family: sans-serif;
+  font-size: 13px;
+  width: 100%;
+  max-width: 1200px;
+  box-sizing: border-box;
+}
+
+.config-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: #555;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
+
+.config-bar input {
+  padding: 5px 8px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 3px;
+  color: #333;
+  font-size: 13px;
+  font-family: monospace;
+  width: 200px;
+}
+
+.config-bar input:focus {
+  outline: none;
+  border-color: #49cc90;
+  box-shadow: 0 0 0 2px rgba(73, 204, 144, 0.2);
+}
+
+.config-bar button {
+  padding: 6px 14px;
+  background: #49cc90;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.config-bar button:first-of-type {
+  margin-left: auto;
+}
+
+.config-bar button:hover {
+  background: #3dbd80;
+}
+
+.config-bar button.secondary {
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  color: #555;
+}
+
+.config-bar button.secondary:hover {
+  background: #f5f5f5;
+}
+
+#status-line {
+  font-size: 12px;
+  color: #888;
+  font-family: monospace;
+  align-self: center;
+  margin-left: 4px;
+}
+
+#swagger-ui {
+  max-width: 1200px;
+  width: 100%;
+  box-sizing: border-box;
+}
