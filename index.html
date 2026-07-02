@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smartbox OpenAPI Testing Tool</title>
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css"/>
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="css/index.css" />
   </head>
 
   <body>
@@ -23,13 +23,13 @@
       <div class="config-bar-main">
         <div class="config-bar-inputs">
           <label>Base URL
-            <input id="base-url" value="http://10.191.15.192:30000/" />
+            <input id="base-url" value="" />
           </label>
           <label>Username
             <input id="username" value="admin" style="width: 120px" />
           </label>
           <label>Password MD5
-            <input id="password-md5" value="e10adc3949ba59abbe56e057f20f883e" />
+            <input id="password-md5" value="" />
           </label> 
           <label>Token
             <input id="token" placeholder="Paste token or use Login endpoint" />
@@ -53,6 +53,6 @@
 
     <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js" crossorigin></script>
     <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js" crossorigin></script>
-    <script type="module" src="smartbox-api-tester.js"></script>
+    <script type="module" src="js/smartbox-api-tester.js"></script>
   </body>
 </html>
