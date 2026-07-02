@@ -8,7 +8,7 @@ A local web-based tool for testing and interacting with Smartbox device APIs.
 
 The **Smartbox API Tester** is designed to help developers explore, test, and debug Smartbox endpoints through a simple browser interface. It includes built-in tools for authentication, request editing, and response visualization.
 
-![Alt-text](path/to/your/web-ui.png)
+![Alt-text](assets/web-ui.png)
 ---
 
 ## 🖥️ System & Hardware Specifications
