@@ -8,13 +8,12 @@ A local web-based tool for testing and interacting with Smartbox device APIs.
 
 The **Smartbox API Tester** is designed to help developers explore, test, and debug Smartbox endpoints through a simple browser interface. It includes built-in tools for authentication, request editing, and response visualization.
 
+![smartbox-web-ui](path/to/your/web-ui.png)
 ---
 
 ## 🖥️ System & Hardware Specifications
 
 - **Smartbox Model:** UNV - Edge Computing Server ECS-504B-SF-HD  
-- **Operating System:** Linux  
-- **Distribution:** Zorin OS  
 
 ---
 
@@ -28,11 +27,15 @@ The **Smartbox API Tester** is designed to help developers explore, test, and de
 
 ## 🚀 Quick start
 
-1. Open `smartbox-api-tester.html` in a browser.
-2. Set Base URL to your device host, for example: `http://192.168.1.100:30000`.
-3. Enter **username** and the **MD5 password hash**.
-4. Run the *Login endpoint** to auto-fill the token.
-5. Choose an endpoint, 
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/maralabsph/unv-smartbox-api.git
+   ```
+2. Open `index.html` in a browser.
+3. Set Base URL to your device host, for example: `http://192.168.1.100:30000`.
+4. Enter **username** and the **MD5 password hash**.
+5. Run the *Login endpoint** to auto-fill the token.
+6. Choose an endpoint, 
     - Select an endpoint
     - Fill in **Path parameters**
     - Modify request body
@@ -138,10 +141,10 @@ server {
 	listen 3000;
 	server_name smartbox-api.test;
 	root /path/to/smartbox-api-tester;
-	index smartbox-api-tester.html;
+	index index.html;
 
 	location / {
-		try_files $uri /smartbox-api-tester.html;
+		try_files $uri /index.html;
 	}
 }
 ```
@@ -172,4 +175,4 @@ http://smartbox-api.test:3000
 
 ## 🛠️ Customizing endpoints
 
-Edit the `ENDPOINTS` array in `smartbox-api-tester.html` to add or modify endpoints.
+Edit the `ENDPOINTS` array in `index.html` to add or modify endpoints.
